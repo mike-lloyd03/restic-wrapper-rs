@@ -1,0 +1,26 @@
+repos:
+  machine1:
+    local_path: /local/path/to/repo
+    local_pw_file: /local/path/to/password_file
+    remote_path: s3://path/to/remote/repo
+    remote_pw_file: /local/path/to/remote/password_file
+  machine2:
+    local_path: /local/path/to/repo
+    local_pw_file: /local/path/to/password_file
+    remote_path: s3://path/to/remote/repo
+    remote_pw_file: /local/path/to/remote/password_file
+
+backup:
+  repo_name: machine1
+  exclude:
+    - "/home/mike/.cache"
+  include:
+    - "/home/mike"
+    - "/etc"
+    - "/var/log/pacman.log"
+
+forget:
+  keep_daily: 7
+  keep_weekly: 4
+  keep_monthly: 6
+  keep_yearly: 2
