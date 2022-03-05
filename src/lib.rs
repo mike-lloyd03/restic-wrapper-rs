@@ -40,7 +40,7 @@ pub struct Forget {
 /// ```
 /// use restic_rs::load_config;
 ///
-/// assert_eq!(load_config(paths), );
+/// load_config(vec!["/etc/program/config.yaml", "~/.config/config.yaml"])
 /// ```
 ///
 /// # Errors
