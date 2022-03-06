@@ -1,36 +1,61 @@
+use enum_utils::FromStr;
 use restic_rs::Config;
 use std::process::Command;
 
+#[derive(Debug, FromStr)]
 pub enum Location {
     Local,
     Remote,
 }
 
-fn run(mut cmd: Command) {
-    cmd.spawn().unwrap().wait().unwrap();
+struct Restic {
+    cmd: Command,
+}
+
+impl Restic {
+    fn new(subcommand: &str) -> Restic {
+        let mut cmd = Command::new("restic");
+        cmd.arg(subcommand);
+        Restic { cmd }
+    }
+
+    /// Redirects stdout to /dev/null if `quiet = true`
+    fn quiet(mut self, quiet: bool) -> Restic {
+        if quiet {
+            self.cmd.stdout(std::process::Stdio::null());
+        }
+        self
+    }
+
+    fn run(mut self) {
+        self.cmd.spawn().unwrap().wait().unwrap();
+    }
 }
 
 pub fn backup(config: &Config) {
     let repo_name = &config.backup.repo_name;
     let repo = config.repos.get(repo_name).unwrap();
 
-    let mut cmd = Command::new("restic");
-    cmd.arg("backup")
+    let mut restic = Restic::new("backup");
+    restic
+        .cmd
         .args(["--repo", &repo.local_path])
         .args(["--password-file", &repo.local_pw_file])
         .arg("--exclude-caches");
 
+    // restic.quiet(config.quiet);
+
     if let Some(excludes) = config.backup.exclude.as_ref() {
         for e in excludes {
-            cmd.args(["--exclude", e]);
+            restic.cmd.args(["--exclude", e]);
         }
     };
 
     config.backup.include.iter().for_each(|inc| {
-        cmd.arg(inc);
+        restic.cmd.arg(inc);
     });
 
-    run(cmd);
+    restic.quiet(config.quiet).run();
 }
 
 pub fn check(config: &Config, repo_name: String, location: Location) {
@@ -47,12 +72,13 @@ pub fn check(config: &Config, repo_name: String, location: Location) {
             pw_file = &repo.remote_pw_file;
         }
     }
-    let mut cmd = Command::new("restic");
-    cmd.arg("check")
+    let mut restic = Restic::new("check");
+    restic
+        .cmd
         .args(["--repo", repo_path])
         .args(["--password-file", pw_file]);
 
-    run(cmd);
+    restic.quiet(config.quiet).run();
 }
 
 pub fn copy_to_remote(config: &Config, repo_name: String) {
@@ -61,14 +87,18 @@ pub fn copy_to_remote(config: &Config, repo_name: String) {
     let local_pw_file = &repo.local_pw_file;
     let remote_repo_path = &repo.remote_path;
     let remote_pw_file = &repo.remote_pw_file;
-    let mut cmd = Command::new("restic");
-    cmd.arg("copy")
+
+    let mut restic = Restic::new("copy");
+    restic
+        .cmd
         .args(["--repo", local_path])
         .args(["--password-file", local_pw_file])
         .args(["--repo2", remote_repo_path])
         .args(["--password-file2", remote_pw_file]);
 
-    run(cmd);
+    // restic.quiet(config.quiet);
+
+    restic.quiet(config.quiet).run();
 }
 
 pub fn forget(config: &Config, repo_name: String, location: Location) {
@@ -86,26 +116,33 @@ pub fn forget(config: &Config, repo_name: String, location: Location) {
         }
     }
 
-    let mut cmd = Command::new("restic");
-    cmd.arg("forget")
+    let mut restic = Restic::new("forget");
+    restic
+        .cmd
         .args(["--repo", repo_path])
         .args(["--password-file", pw_file])
         .arg("--prune");
 
     if let Some(t) = &config.forget.keep_yearly {
-        cmd.args(["--keep_yearly", &t.to_string()]);
+        restic.cmd.args(["--keep-yearly", &t.to_string()]);
     }
     if let Some(t) = &config.forget.keep_monthly {
-        cmd.args(["--keep_monthly", &t.to_string()]);
+        restic.cmd.args(["--keep-monthly", &t.to_string()]);
     }
     if let Some(t) = &config.forget.keep_weekly {
-        cmd.args(["--keep_weekly", &t.to_string()]);
+        restic.cmd.args(["--keep-weekly", &t.to_string()]);
     }
     if let Some(t) = &config.forget.keep_daily {
-        cmd.args(["--keep_daily", &t.to_string()]);
+        restic.cmd.args(["--keep-daily", &t.to_string()]);
     }
 
-    run(cmd);
+    if config.quiet {
+        restic.cmd.stdout(std::process::Stdio::null());
+    }
+
+    // restic.quiet(config.quiet);
+
+    restic.quiet(config.quiet).run();
 }
 
 pub fn snapshots(config: &Config, repo_name: String, location: Location) {
@@ -122,10 +159,27 @@ pub fn snapshots(config: &Config, repo_name: String, location: Location) {
             pw_file = &repo.remote_pw_file;
         }
     }
-    let mut cmd = Command::new("restic");
-    cmd.arg("snapshots")
+
+    let mut restic = Restic::new("snapshots");
+    restic
+        .cmd
         .args(["--repo", repo_path])
         .args(["--password-file", pw_file]);
 
-    run(cmd);
+    restic.quiet(config.quiet).run();
+}
+
+pub fn mount(config: &Config, repo_name: String, mount_point: String) {
+    let repo = &config.repos.get(&repo_name).unwrap();
+    let repo_path = &repo.local_path;
+    let pw_file = &repo.local_pw_file;
+
+    let mut restic = Restic::new("mount");
+    restic
+        .cmd
+        .arg(mount_point)
+        .args(["--repo", repo_path])
+        .args(["--password-file", pw_file]);
+
+    restic.quiet(config.quiet).run();
 }
