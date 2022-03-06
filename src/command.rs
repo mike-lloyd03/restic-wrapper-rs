@@ -32,6 +32,19 @@ impl Restic {
     }
 }
 
+pub fn init(config: &Config) {
+    let repo_name = &config.backup.repo_name;
+    let repo = config.repos.get(repo_name).unwrap();
+
+    let mut restic = Restic::new("init");
+    restic
+        .cmd
+        .args(["--repo", &repo.local_path])
+        .args(["--password-file", &repo.local_pw_file]);
+
+    restic.run();
+}
+
 pub fn backup(config: &Config) {
     let repo_name = &config.backup.repo_name;
     let repo = config.repos.get(repo_name).unwrap();

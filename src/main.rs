@@ -20,6 +20,8 @@ struct Cli {
 
 #[derive(Subcommand, Debug)]
 enum Command {
+    /// Initialize a new repo
+    Init,
     /// Run a backup job now
     Backup,
     /// Check the condition of all configured repos
@@ -49,6 +51,7 @@ fn main() {
     // println!("{:?}", std::env::var_os("AWS_ACCESS_KEY_ID"));
 
     match &cli.command {
+        Command::Init => init(&config),
         Command::Backup => {
             backup(&config);
             forget(&config, config.backup.repo_name.clone(), Location::Local);
