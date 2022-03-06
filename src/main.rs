@@ -84,9 +84,9 @@ fn main() {
             for repo in &config.repos {
                 let repo_name = repo.0.to_owned();
                 println!("-------- {} local repo ----------", repo_name);
-                snapshots(&config, config.backup.repo_name.clone(), Location::Local);
+                snapshots(&config, repo_name.clone(), Location::Local);
                 println!("-------- {} remote repo ----------", repo_name);
-                snapshots(&config, config.backup.repo_name.clone(), Location::Remote);
+                snapshots(&config, repo_name.clone(), Location::Remote);
             }
         }
         Command::Unlock => unimplemented!(),
