@@ -27,7 +27,11 @@ impl Restic {
     }
 
     fn run(mut self) {
-        self.cmd.spawn().unwrap().wait().unwrap();
+        self.cmd
+            .spawn()
+            .expect("The restic command could not be found")
+            .wait()
+            .unwrap();
     }
 }
 
