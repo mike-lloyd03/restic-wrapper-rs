@@ -1,8 +1,7 @@
-use enum_utils::FromStr;
 use restic_rs::Config;
 use std::process::Command;
 
-#[derive(Debug, FromStr)]
+#[derive(Debug)]
 pub enum Location {
     Local,
     Remote,

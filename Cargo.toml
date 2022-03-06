@@ -11,4 +11,3 @@ clap = { version = "3.1.2", features = ["derive"] }
 dotenv = "0.15.0"
 serde = { version = "1.0.136", features = ["derive"] }
 serde_yaml = "0.8.23"
-enum-utils = "0.1.2"
