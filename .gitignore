@@ -1,2 +1,4 @@
 /target
 restic-scripts
+repos.yaml
+/restic_rs
