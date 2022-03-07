@@ -38,7 +38,10 @@ enum Command {
         mount_point: String,
     },
     /// Not implemented
-    Prune,
+    Prune {
+        /// The repository to prune
+        repo: Option<String>,
+    },
     /// Displays all snapshots available in the local and remote repos
     Snapshots,
     /// Not implemented
@@ -95,7 +98,23 @@ fn main() {
         Command::Mount { repo, mount_point } => {
             mount(&config, repo.to_string(), mount_point.to_string())
         }
-        Command::Prune => unimplemented!(),
+        Command::Prune { repo } => {
+            // This needs to be cleaned up to specify "local" or "remote" repo
+            for r in &config.repos {
+                let repo_name = r.0.to_owned();
+
+                if let Some(repo_arg) = repo {
+                    if &repo_name != repo_arg {
+                        continue;
+                    }
+                }
+                if !config.quiet {
+                    println!("\n-------- Pruning {} ----------", &repo_name);
+                }
+
+                prune(&config, repo_name.clone());
+            }
+        }
         Command::Snapshots => {
             for repo in &config.repos {
                 let repo_name = repo.0.to_owned();

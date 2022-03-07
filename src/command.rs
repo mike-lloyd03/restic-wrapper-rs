@@ -199,3 +199,17 @@ pub fn mount(config: &Config, repo_name: String, mount_point: String) {
 
     restic.quiet(config.quiet).run();
 }
+
+pub fn prune(config: &Config, repo_name: String) {
+    let repo = &config.repos.get(&repo_name).unwrap();
+    let repo_path = &repo.local_path;
+    let pw_file = &repo.local_pw_file;
+
+    let mut restic = Restic::new("mount");
+    restic
+        .cmd
+        .args(["--repo", repo_path])
+        .args(["--password-file", pw_file]);
+
+    restic.quiet(config.quiet).run();
+}
