@@ -27,7 +27,10 @@ enum Command {
     /// Check the condition of all configured repos
     Check,
     /// Copy a local repo to its remote counterpart
-    CopyToRemote,
+    CopyToRemote {
+        /// The repository to copy to remote (default=all)
+        repo: Option<String>,
+    },
     /// Mount the repository at the specified location
     Mount {
         repo: String,
@@ -69,9 +72,16 @@ fn main() {
                 check(&config, repo_name, Location::Remote)
             }
         }
-        Command::CopyToRemote => {
-            for repo in &config.repos {
-                let repo_name = repo.0.to_owned();
+        Command::CopyToRemote { repo } => {
+            for r in &config.repos {
+                let repo_name = r.0.to_owned();
+
+                if let Some(repo_arg) = repo {
+                    if &repo_name != repo_arg {
+                        continue;
+                    }
+                }
+
                 copy_to_remote(&config, repo_name.clone());
                 forget(&config, repo_name.clone(), Location::Remote);
             }
