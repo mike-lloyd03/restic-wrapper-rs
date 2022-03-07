@@ -35,7 +35,10 @@ enum Command {
     /// Run a backup job now
     Backup,
     /// Check the condition of all configured repos
-    Check,
+    Check {
+        /// The repository to check
+        repo: Option<String>,
+    },
     /// Copy a local repo to its remote counterpart
     CopyToRemote {
         /// The repository to copy to remote (default=all)
@@ -84,9 +87,16 @@ fn main() {
             backup(&app);
             forget(&app, app.config.backup.repo_name.clone(), Location::Local);
         }
-        Command::Check => {
-            for repo in &app.config.repos {
-                let repo_name = repo.0.to_owned();
+        Command::Check { repo } => {
+            for r in &app.config.repos {
+                let repo_name = r.0.to_owned();
+
+                if let Some(repo_arg) = repo {
+                    if &repo_name != repo_arg {
+                        continue;
+                    }
+                }
+
                 if !app.args.quiet {
                     println!("\n-------- Checking {} local repo ----------", &repo_name);
                 }
