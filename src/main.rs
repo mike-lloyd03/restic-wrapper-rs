@@ -81,6 +81,12 @@ fn main() {
                         continue;
                     }
                 }
+                if !config.quiet {
+                    println!(
+                        "\n-------- Copying {} local repo to remote ----------",
+                        &repo_name
+                    );
+                }
 
                 copy_to_remote(&config, repo_name.clone());
                 forget(&config, repo_name.clone(), Location::Remote);
