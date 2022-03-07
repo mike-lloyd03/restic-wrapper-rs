@@ -2,6 +2,7 @@ use clap::{Parser, Subcommand};
 pub mod command;
 use self::command::*;
 use restic_rs::{load_config, Config};
+use std::process::exit;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about)]
@@ -12,7 +13,7 @@ struct Args {
 
     /// Arguments to pass to restic
     #[clap(short, long)]
-    args: String,
+    args: Option<String>,
 
     /// Alternate configuration file to use
     #[clap(short, long, value_name = "FILE", default_value = "repos.yaml")]
@@ -62,7 +63,13 @@ enum Command {
 
 fn main() {
     let args = Args::parse();
-    let config = load_config(vec![&args.config_file]).unwrap();
+    let config = match load_config(vec![&args.config_file]) {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("Unable to load the configuration file. {}", e);
+            exit(1);
+        }
+    };
     let app = App { args, config };
     // let args = Args::parse();
     // let mut config = load_config(vec![&args.config_file]).unwrap();

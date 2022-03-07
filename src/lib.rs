@@ -59,5 +59,5 @@ pub fn load_config(paths: Vec<&str>) -> Result<Config> {
             return Ok(serde_yaml::from_reader(f)?);
         }
     }
-    bail!("No configuration file was found")
+    bail!("No configuration file was found.")
 }
