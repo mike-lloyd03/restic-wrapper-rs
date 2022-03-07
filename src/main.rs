@@ -1,14 +1,18 @@
 use clap::{Parser, Subcommand};
 pub mod command;
 use self::command::*;
-use restic_rs::load_config;
+use restic_rs::{load_config, Config};
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about)]
-struct Cli {
+struct Args {
     /// Suppress standard output
     #[clap(short, long)]
     quiet: bool,
+
+    /// Arguments to pass to restic
+    #[clap(short, long)]
+    args: String,
 
     /// Alternate configuration file to use
     #[clap(short, long, value_name = "FILE", default_value = "repos.yaml")]
@@ -16,6 +20,11 @@ struct Cli {
 
     #[clap(subcommand)]
     command: Command,
+}
+
+pub struct App {
+    args: Args,
+    config: Config,
 }
 
 #[derive(Subcommand, Debug)]
@@ -52,34 +61,37 @@ enum Command {
 }
 
 fn main() {
-    let cli = Cli::parse();
-    let mut config = load_config(vec![&cli.config_file]).unwrap();
-    config.quiet = cli.quiet;
+    let args = Args::parse();
+    let config = load_config(vec![&args.config_file]).unwrap();
+    let app = App { args, config };
+    // let args = Args::parse();
+    // let mut config = load_config(vec![&args.config_file]).unwrap();
+    // config.quiet = args.quiet;
 
     // dotenv::from_path("/etc/storj/s3creds").unwrap();
     // println!("{:?}", std::env::var_os("AWS_ACCESS_KEY_ID"));
 
-    match &cli.command {
-        Command::Init => init(&config),
+    match &app.args.command {
+        Command::Init => init(&app),
         Command::Backup => {
-            backup(&config);
-            forget(&config, config.backup.repo_name.clone(), Location::Local);
+            backup(&app);
+            forget(&app, app.config.backup.repo_name.clone(), Location::Local);
         }
         Command::Check => {
-            for repo in &config.repos {
+            for repo in &app.config.repos {
                 let repo_name = repo.0.to_owned();
-                if !config.quiet {
+                if !app.args.quiet {
                     println!("\n-------- Checking {} local repo ----------", &repo_name);
                 }
-                check(&config, repo_name.clone(), Location::Local);
-                if !config.quiet {
+                check(&app, repo_name.clone(), Location::Local);
+                if !app.args.quiet {
                     println!("\n-------- Checking {} remote repo ----------", &repo_name);
                 }
-                check(&config, repo_name, Location::Remote)
+                check(&app, repo_name, Location::Remote)
             }
         }
         Command::CopyToRemote { repo } => {
-            for r in &config.repos {
+            for r in &app.config.repos {
                 let repo_name = r.0.to_owned();
 
                 if let Some(repo_arg) = repo {
@@ -87,23 +99,23 @@ fn main() {
                         continue;
                     }
                 }
-                if !config.quiet {
+                if !app.args.quiet {
                     println!(
                         "\n-------- Copying {} local repo to remote ----------",
                         &repo_name
                     );
                 }
 
-                copy_to_remote(&config, repo_name.clone());
-                forget(&config, repo_name.clone(), Location::Remote);
+                copy_to_remote(&app, repo_name.clone());
+                forget(&app, repo_name.clone(), Location::Remote);
             }
         }
         Command::Mount { repo, mount_point } => {
-            mount(&config, repo.to_string(), mount_point.to_string())
+            mount(&app, repo.to_string(), mount_point.to_string())
         }
         Command::Prune { repo } => {
             // This needs to be cleaned up to specify "local" or "remote" repo
-            for r in &config.repos {
+            for r in &app.config.repos {
                 let repo_name = r.0.to_owned();
 
                 if let Some(repo_arg) = repo {
@@ -111,15 +123,15 @@ fn main() {
                         continue;
                     }
                 }
-                if !config.quiet {
+                if !app.args.quiet {
                     println!("\n-------- Pruning {} ----------", &repo_name);
                 }
 
-                prune(&config, repo_name.clone());
+                prune(&app, repo_name.clone());
             }
         }
         Command::Snapshots { repo } => {
-            for r in &config.repos {
+            for r in &app.config.repos {
                 let repo_name = r.0.to_owned();
                 if let Some(repo_arg) = repo {
                     if &repo_name != repo_arg {
@@ -127,9 +139,9 @@ fn main() {
                     }
                 }
                 println!("-------- {} local repo ----------", repo_name);
-                snapshots(&config, repo_name.clone(), Location::Local);
+                snapshots(&app, repo_name.clone(), Location::Local);
                 println!("-------- {} remote repo ----------", repo_name);
-                snapshots(&config, repo_name.clone(), Location::Remote);
+                snapshots(&app, repo_name.clone(), Location::Remote);
             }
         }
         Command::Unlock => unimplemented!(),

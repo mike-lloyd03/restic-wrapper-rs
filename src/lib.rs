@@ -7,8 +7,6 @@ pub struct Config {
     pub repos: HashMap<String, Repo>,
     pub backup: Backup,
     pub forget: Forget,
-    #[serde(default)]
-    pub quiet: bool,
 }
 
 #[derive(Debug, Deserialize)]
