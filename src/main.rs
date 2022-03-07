@@ -43,7 +43,10 @@ enum Command {
         repo: Option<String>,
     },
     /// Displays all snapshots available in the local and remote repos
-    Snapshots,
+    Snapshots {
+        /// The repository to get snapshots from
+        repo: Option<String>,
+    },
     /// Not implemented
     Unlock,
 }
@@ -115,9 +118,14 @@ fn main() {
                 prune(&config, repo_name.clone());
             }
         }
-        Command::Snapshots => {
-            for repo in &config.repos {
-                let repo_name = repo.0.to_owned();
+        Command::Snapshots { repo } => {
+            for r in &config.repos {
+                let repo_name = r.0.to_owned();
+                if let Some(repo_arg) = repo {
+                    if &repo_name != repo_arg {
+                        continue;
+                    }
+                }
                 println!("-------- {} local repo ----------", repo_name);
                 snapshots(&config, repo_name.clone(), Location::Local);
                 println!("-------- {} remote repo ----------", repo_name);
