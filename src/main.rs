@@ -37,7 +37,7 @@ enum Command {
         // location: Location,
         mount_point: String,
     },
-    /// Not implemented
+    /// Prune repositories
     Prune {
         /// The repository to prune
         repo: Option<String>,
