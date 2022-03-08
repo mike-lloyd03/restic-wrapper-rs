@@ -40,10 +40,7 @@ enum Command {
         repo: Option<String>,
     },
     /// Copy a local repo to its remote counterpart
-    CopyToRemote {
-        /// The repository to copy to remote (default=all)
-        repo: Option<String>,
-    },
+    CopyAll,
     /// Mount the repository at the specified location
     Mount {
         repo: String,
@@ -83,10 +80,13 @@ fn main() {
 
     match &app.args.command {
         Command::Init => init(&app),
+
         Command::Backup => {
+            let repo_name = &app.config.backup.repo_name;
             backup(&app);
-            forget(&app, app.config.backup.repo_name.clone(), Location::Local);
+            forget(&app, repo_name.to_string());
         }
+
         Command::Check { repo } => {
             for r in &app.config.repos {
                 let repo_name = r.0.to_owned();
@@ -100,36 +100,37 @@ fn main() {
                 if !app.args.quiet {
                     println!("\n-------- Checking {} local repo ----------", &repo_name);
                 }
-                check(&app, repo_name.clone(), Location::Local);
+                check(&app, repo_name.clone());
                 if !app.args.quiet {
                     println!("\n-------- Checking {} remote repo ----------", &repo_name);
                 }
-                check(&app, repo_name, Location::Remote)
+                check(&app, repo_name)
             }
         }
-        Command::CopyToRemote { repo } => {
-            for r in &app.config.repos {
-                let repo_name = r.0.to_owned();
 
-                if let Some(repo_arg) = repo {
-                    if &repo_name != repo_arg {
-                        continue;
-                    }
+        Command::CopyAll => {
+            let copy_pairs = match &app.config.copy {
+                Some(c) => c,
+                None => {
+                    eprintln!("No copy pairs are defined in the configuration file.");
+                    exit(1);
                 }
+            };
+
+            for c in copy_pairs {
                 if !app.args.quiet {
-                    println!(
-                        "\n-------- Copying {} local repo to remote ----------",
-                        &repo_name
-                    );
+                    println!("\n-------- Copying {} to {} ----------", &c.src, &c.dest);
                 }
 
-                copy_to_remote(&app, repo_name.clone());
-                forget(&app, repo_name.clone(), Location::Remote);
+                copy(&app, c.src.to_string(), c.dest.to_string());
+                forget(&app, c.dest.to_string());
             }
         }
+
         Command::Mount { repo, mount_point } => {
             mount(&app, repo.to_string(), mount_point.to_string())
         }
+
         Command::Prune { repo } => {
             // This needs to be cleaned up to specify "local" or "remote" repo
             for r in &app.config.repos {
@@ -147,6 +148,7 @@ fn main() {
                 prune(&app, repo_name.clone());
             }
         }
+
         Command::Snapshots { repo } => {
             for r in &app.config.repos {
                 let repo_name = r.0.to_owned();
@@ -156,11 +158,12 @@ fn main() {
                     }
                 }
                 println!("-------- {} local repo ----------", repo_name);
-                snapshots(&app, repo_name.clone(), Location::Local);
+                snapshots(&app, repo_name.clone());
                 println!("-------- {} remote repo ----------", repo_name);
-                snapshots(&app, repo_name.clone(), Location::Remote);
+                snapshots(&app, repo_name.clone());
             }
         }
+
         Command::Unlock => unimplemented!(),
     };
 }

@@ -6,15 +6,14 @@ use std::collections::HashMap;
 pub struct Config {
     pub repos: HashMap<String, Repo>,
     pub backup: Backup,
+    pub copy: Option<Vec<Copy>>,
     pub forget: Forget,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Repo {
-    pub local_path: String,
-    pub local_pw_file: String,
-    pub remote_path: String,
-    pub remote_pw_file: String,
+    pub path: String,
+    pub pw_file: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -22,6 +21,12 @@ pub struct Backup {
     pub repo_name: String,
     pub exclude: Option<Vec<String>>,
     pub include: Vec<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Copy {
+    pub src: String,
+    pub dest: String,
 }
 
 #[derive(Debug, Deserialize)]

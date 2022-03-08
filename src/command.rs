@@ -1,12 +1,6 @@
 use crate::App;
 use std::process::Command;
 
-#[derive(Debug)]
-pub enum Location {
-    Local,
-    Remote,
-}
-
 struct Restic {
     cmd: Command,
 }
@@ -42,8 +36,8 @@ pub fn init(app: &App) {
     let mut restic = Restic::new("init");
     restic
         .cmd
-        .args(["--repo", &repo.local_path])
-        .args(["--password-file", &repo.local_pw_file]);
+        .args(["--repo", &repo.path])
+        .args(["--password-file", &repo.pw_file]);
 
     restic.run();
 }
@@ -55,8 +49,8 @@ pub fn backup(app: &App) {
     let mut restic = Restic::new("backup");
     restic
         .cmd
-        .args(["--repo", &repo.local_path])
-        .args(["--password-file", &repo.local_pw_file])
+        .args(["--repo", &repo.path])
+        .args(["--password-file", &repo.pw_file])
         .arg("--exclude-caches");
 
     // restic.quiet(app.config.quiet);
@@ -74,69 +68,43 @@ pub fn backup(app: &App) {
     restic.quiet(app.args.quiet).run();
 }
 
-pub fn check(app: &App, repo_name: String, location: Location) {
+pub fn check(app: &App, repo_name: String) {
     let repo = &app.config.repos.get(&repo_name).unwrap();
-    let repo_path: &str;
-    let pw_file: &str;
-    match location {
-        Location::Local => {
-            repo_path = &repo.local_path;
-            pw_file = &repo.local_pw_file;
-        }
-        Location::Remote => {
-            repo_path = &repo.remote_path;
-            pw_file = &repo.remote_pw_file;
-        }
-    }
+
     let mut restic = Restic::new("check");
     restic
         .cmd
-        .args(["--repo", repo_path])
-        .args(["--password-file", pw_file]);
+        .args(["--repo", &repo.path])
+        .args(["--password-file", &repo.pw_file]);
 
     restic.quiet(app.args.quiet).run();
 }
 
-pub fn copy_to_remote(app: &App, repo_name: String) {
-    let repo = &app.config.repos.get(&repo_name).unwrap();
-    let local_path = &repo.local_path;
-    let local_pw_file = &repo.local_pw_file;
-    let remote_repo_path = &repo.remote_path;
-    let remote_pw_file = &repo.remote_pw_file;
+pub fn copy(app: &App, src_repo: String, dest_repo: String) {
+    let src_repo = &app.config.repos.get(&src_repo).unwrap();
+    let dest_repo = &app.config.repos.get(&dest_repo).unwrap();
 
     let mut restic = Restic::new("copy");
     restic
         .cmd
-        .args(["--repo", local_path])
-        .args(["--password-file", local_pw_file])
-        .args(["--repo2", remote_repo_path])
-        .args(["--password-file2", remote_pw_file]);
+        .args(["--repo", &src_repo.path])
+        .args(["--password-file", &src_repo.pw_file])
+        .args(["--repo2", &dest_repo.path])
+        .args(["--password-file2", &dest_repo.pw_file]);
 
     // restic.quiet(config.quiet);
 
     restic.quiet(app.args.quiet).run();
 }
 
-pub fn forget(app: &App, repo_name: String, location: Location) {
+pub fn forget(app: &App, repo_name: String) {
     let repo = &app.config.repos.get(&repo_name).unwrap();
-    let repo_path: &str;
-    let pw_file: &str;
-    match location {
-        Location::Local => {
-            repo_path = &repo.local_path;
-            pw_file = &repo.local_pw_file;
-        }
-        Location::Remote => {
-            repo_path = &repo.remote_path;
-            pw_file = &repo.remote_pw_file;
-        }
-    }
 
     let mut restic = Restic::new("forget");
     restic
         .cmd
-        .args(["--repo", repo_path])
-        .args(["--password-file", pw_file])
+        .args(["--repo", &repo.path])
+        .args(["--password-file", &repo.pw_file])
         .arg("--prune");
 
     if let Some(t) = &app.config.forget.keep_yearly {
@@ -155,55 +123,39 @@ pub fn forget(app: &App, repo_name: String, location: Location) {
     restic.quiet(app.args.quiet).run();
 }
 
-pub fn snapshots(app: &App, repo_name: String, location: Location) {
+pub fn snapshots(app: &App, repo_name: String) {
     let repo = &app.config.repos.get(&repo_name).unwrap();
-    let repo_path: &str;
-    let pw_file: &str;
-    match location {
-        Location::Local => {
-            repo_path = &repo.local_path;
-            pw_file = &repo.local_pw_file;
-        }
-        Location::Remote => {
-            repo_path = &repo.remote_path;
-            pw_file = &repo.remote_pw_file;
-        }
-    }
 
     let mut restic = Restic::new("snapshots");
     restic
         .cmd
-        .args(["--repo", repo_path])
-        .args(["--password-file", pw_file]);
+        .args(["--repo", &repo.path])
+        .args(["--password-file", &repo.pw_file]);
 
     restic.quiet(app.args.quiet).run();
 }
 
 pub fn mount(app: &App, repo_name: String, mount_point: String) {
     let repo = &app.config.repos.get(&repo_name).unwrap();
-    let repo_path = &repo.local_path;
-    let pw_file = &repo.local_pw_file;
 
     let mut restic = Restic::new("mount");
     restic
         .cmd
         .arg(mount_point)
-        .args(["--repo", repo_path])
-        .args(["--password-file", pw_file]);
+        .args(["--repo", &repo.path])
+        .args(["--password-file", &repo.pw_file]);
 
     restic.quiet(app.args.quiet).run();
 }
 
 pub fn prune(app: &App, repo_name: String) {
     let repo = &app.config.repos.get(&repo_name).unwrap();
-    let repo_path = &repo.local_path;
-    let pw_file = &repo.local_pw_file;
 
     let mut restic = Restic::new("mount");
     restic
         .cmd
-        .args(["--repo", repo_path])
-        .args(["--password-file", pw_file]);
+        .args(["--repo", &repo.path])
+        .args(["--password-file", &repo.pw_file]);
 
     restic.quiet(app.args.quiet).run();
 }
