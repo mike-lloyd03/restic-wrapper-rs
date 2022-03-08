@@ -61,8 +61,38 @@ pub fn load_config(paths: Vec<&str>) -> Result<Config> {
     for path in paths {
         if Path::new(path).exists() {
             f = File::open(path)?;
-            return Ok(serde_yaml::from_reader(f)?);
+            let config: Config = serde_yaml::from_reader(f)?;
+            return validate_config(config);
         }
     }
     bail!("No configuration file was found.")
+}
+
+fn validate_config(config: Config) -> Result<Config> {
+    let repos = &config.repos;
+    let check_repo = |repo| -> bool { repos.get(repo).is_some() };
+
+    // Check backup repo name
+    if !check_repo(&config.backup.repo_name) {
+        bail!("The repo defined for backup was not found in the repo map")
+    };
+
+    // Check src and dest repos of copy vec
+    if let Some(copy_pairs) = &config.copy {
+        for c in copy_pairs {
+            if !check_repo(&c.src) {
+                bail!(
+                    "The copy source \"{}\" was not found in the repo map.",
+                    &c.src
+                )
+            }
+            if !check_repo(&c.dest) {
+                bail!(
+                    "The copy destination \"{}\" was not found in the repo map.",
+                    &c.dest
+                )
+            }
+        }
+    }
+    Ok(config)
 }
