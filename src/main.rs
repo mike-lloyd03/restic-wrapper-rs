@@ -157,9 +157,7 @@ fn main() {
                         continue;
                     }
                 }
-                println!("-------- {} local repo ----------", repo_name);
-                snapshots(&app, repo_name.clone());
-                println!("-------- {} remote repo ----------", repo_name);
+                println!("-------- {} repo ----------", repo_name);
                 snapshots(&app, repo_name.clone());
             }
         }
