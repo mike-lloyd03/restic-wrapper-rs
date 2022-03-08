@@ -6,7 +6,7 @@ use std::collections::HashMap;
 pub struct Config {
     pub repos: HashMap<String, Repo>,
     pub backup: Backup,
-    pub copy: Option<Vec<Copy>>,
+    pub copy: Option<Copy>,
     pub forget: Forget,
 }
 
@@ -21,10 +21,19 @@ pub struct Backup {
     pub repo_name: String,
     pub exclude: Option<Vec<String>>,
     pub include: Vec<String>,
+    pub pre_command: Option<String>,
+    pub post_command: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
 pub struct Copy {
+    pub pre_command: Option<String>,
+    pub post_command: Option<String>,
+    pub pairs: Vec<CopyPair>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CopyPair {
     pub src: String,
     pub dest: String,
 }
@@ -78,8 +87,8 @@ fn validate_config(config: Config) -> Result<Config> {
     };
 
     // Check src and dest repos of copy vec
-    if let Some(copy_pairs) = &config.copy {
-        for c in copy_pairs {
+    if let Some(copy) = &config.copy {
+        for c in &copy.pairs {
             if !check_repo(&c.src) {
                 bail!(
                     "The copy source \"{}\" was not found in the repo map.",

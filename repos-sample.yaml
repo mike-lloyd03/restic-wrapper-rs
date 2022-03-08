@@ -14,8 +14,12 @@ backup:
     - "/home/mike"
     - "/etc"
     - "/var/log/pacman.log"
+  pre_command: "/bin/echo 'precommand' > /home/mike/precommand"
+  post_command: "/bin/echo 'postcommand' > /home/mike/postcommand"
 
 copy:
+  pre_command: "/bin/echo 'precommand' > /home/mike/precommand"
+  post_command: "/bin/echo 'postcommand' > /home/mike/postcommand"
   - src: repo1
     dest: repo2
 

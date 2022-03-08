@@ -1,5 +1,5 @@
 use crate::App;
-use std::process::Command;
+use std::process::{exit, Command};
 
 struct Restic {
     cmd: Command,
@@ -44,7 +44,11 @@ pub fn init(app: &App) {
 
 pub fn backup(app: &App) {
     let repo_name = &app.config.backup.repo_name;
-    let repo = app.config.repos.get(repo_name).unwrap();
+    let repo = app
+        .config
+        .repos
+        .get(repo_name)
+        .unwrap_or_else(|| panic!("Failed to find {} in repo map", repo_name));
 
     let mut restic = Restic::new("backup");
     restic
@@ -52,8 +56,6 @@ pub fn backup(app: &App) {
         .args(["--repo", &repo.path])
         .args(["--password-file", &repo.pw_file])
         .arg("--exclude-caches");
-
-    // restic.quiet(app.config.quiet);
 
     if let Some(excludes) = app.config.backup.exclude.as_ref() {
         for e in excludes {
@@ -65,7 +67,15 @@ pub fn backup(app: &App) {
         restic.cmd.arg(inc);
     });
 
+    if let Some(cmd) = &app.config.backup.pre_command {
+        run_cmd(cmd)
+    }
+
     restic.quiet(app.args.quiet).run();
+
+    if let Some(cmd) = &app.config.backup.post_command {
+        run_cmd(cmd)
+    }
 }
 
 pub fn check(app: &App, repo_name: String) {
@@ -92,9 +102,15 @@ pub fn copy(app: &App, src_repo: String, dest_repo: String) {
         .args(["--repo2", &dest_repo.path])
         .args(["--password-file2", &dest_repo.pw_file]);
 
-    // restic.quiet(config.quiet);
+    if let Some(cmd) = &app.config.copy.pre_command {
+        run_cmd(cmd)
+    }
 
     restic.quiet(app.args.quiet).run();
+
+    if let Some(cmd) = &app.config.copy.post_command {
+        run_cmd(cmd)
+    }
 }
 
 pub fn forget(app: &App, repo_name: String) {
@@ -158,4 +174,19 @@ pub fn prune(app: &App, repo_name: String) {
         .args(["--password-file", &repo.pw_file]);
 
     restic.quiet(app.args.quiet).run();
+}
+
+fn run_cmd(cmd_str: &str) {
+    let mut cmd = Command::new("/bin/bash");
+    cmd.arg("-c").arg(&cmd_str);
+
+    match cmd.spawn() {
+        Ok(mut cmd) => {
+            cmd.wait().unwrap();
+        }
+        Err(e) => {
+            eprintln!("Failed to run command '{}'. {}", cmd_str, e);
+            exit(1);
+        }
+    }
 }

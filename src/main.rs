@@ -39,7 +39,7 @@ enum Command {
         /// The repository to check
         repo: Option<String>,
     },
-    /// Copy a local repo to its remote counterpart
+    /// Copy all configured repo pairs
     CopyAll,
     /// Mount the repository at the specified location
     Mount {
@@ -52,9 +52,9 @@ enum Command {
         /// The repository to prune
         repo: Option<String>,
     },
-    /// Displays all snapshots available in the local and remote repos
+    /// Displays all snapshots available
     Snapshots {
-        /// The repository to get snapshots from
+        /// The repository to get snapshots from (default=all)
         repo: Option<String>,
     },
     /// Not implemented
@@ -71,12 +71,6 @@ fn main() {
         }
     };
     let app = App { args, config };
-    // let args = Args::parse();
-    // let mut config = load_config(vec![&args.config_file]).unwrap();
-    // config.quiet = args.quiet;
-
-    // dotenv::from_path("/etc/storj/s3creds").unwrap();
-    // println!("{:?}", std::env::var_os("AWS_ACCESS_KEY_ID"));
 
     match &app.args.command {
         Command::Init => init(&app),
