@@ -111,7 +111,7 @@ fn main() {
                 }
             };
 
-            for c in copy_pairs {
+            for c in &copy_pairs.pairs {
                 if !app.args.quiet {
                     println!("\n-------- Copying {} to {} ----------", &c.src, &c.dest);
                 }
