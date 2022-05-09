@@ -99,13 +99,9 @@ fn main() {
                 }
 
                 if !app.args.quiet {
-                    println!("\n-------- Checking {} local repo ----------", &repo_name);
+                    println!("\n-------- Checking {} repo ----------", &repo_name);
                 }
-                check(&app, repo_name.clone());
-                if !app.args.quiet {
-                    println!("\n-------- Checking {} remote repo ----------", &repo_name);
-                }
-                check(&app, repo_name)
+                check(&app, repo_name);
             }
         }
 
