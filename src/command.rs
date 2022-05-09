@@ -102,14 +102,18 @@ pub fn copy(app: &App, src_repo: String, dest_repo: String) {
         .args(["--repo2", &dest_repo.path])
         .args(["--password-file2", &dest_repo.pw_file]);
 
-    if let Some(cmd) = &app.config.copy.pre_command {
-        run_cmd(cmd)
+    if let Some(copy) = &app.config.copy {
+        if let Some(cmd) = copy.pre_command {
+            run_cmd(&cmd)
+        }
     }
 
     restic.quiet(app.args.quiet).run();
 
-    if let Some(cmd) = &app.config.copy.post_command {
-        run_cmd(cmd)
+    if let Some(copy) = &app.config.copy {
+        if let Some(cmd) = copy.post_command {
+            run_cmd(&cmd)
+        }
     }
 }
 
