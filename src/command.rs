@@ -104,7 +104,7 @@ pub fn copy(app: &App, src_repo: String, dest_repo: String) {
 
     if let Some(copy) = &app.config.copy {
         if let Some(cmd) = &copy.pre_command {
-            run_cmd(&cmd)
+            run_cmd(cmd)
         }
     }
 
@@ -112,7 +112,7 @@ pub fn copy(app: &App, src_repo: String, dest_repo: String) {
 
     if let Some(copy) = &app.config.copy {
         if let Some(cmd) = &copy.post_command {
-            run_cmd(&cmd)
+            run_cmd(cmd)
         }
     }
 }
@@ -180,7 +180,7 @@ pub fn prune(app: &App, repo_name: String) {
     restic.quiet(app.args.quiet).run();
 }
 
-fn run_cmd(cmd_str: &str) {
+pub fn run_cmd(cmd_str: &str) {
     let mut cmd = Command::new("/bin/bash");
     cmd.arg("-c").arg(&cmd_str);
 

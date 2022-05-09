@@ -8,6 +8,8 @@ pub struct Config {
     pub backup: Backup,
     pub copy: Option<Copy>,
     pub forget: Forget,
+    pub pre_command: Option<String>,
+    pub post_command: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]

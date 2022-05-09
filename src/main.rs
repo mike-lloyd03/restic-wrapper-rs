@@ -72,6 +72,10 @@ fn main() {
     };
     let app = App { args, config };
 
+    if let Some(cmd) = &app.config.pre_command {
+        command::run_cmd(cmd)
+    }
+
     match &app.args.command {
         Command::Init => init(&app),
 
@@ -158,6 +162,10 @@ fn main() {
 
         Command::Unlock => unimplemented!(),
     };
+
+    if let Some(cmd) = &app.config.post_command {
+        command::run_cmd(cmd)
+    }
 }
 
 // fn output(res: Result) {}
