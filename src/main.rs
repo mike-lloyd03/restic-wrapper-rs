@@ -58,7 +58,10 @@ enum Command {
         repo: Option<String>,
     },
     /// Not implemented
-    Unlock,
+    Unlock {
+        /// The repository to unlock
+        repo: String,
+    },
 }
 
 fn main() {
@@ -160,7 +163,7 @@ fn main() {
             }
         }
 
-        Command::Unlock => unimplemented!(),
+        Command::Unlock { repo } => unlock(&app, repo.to_string()),
     };
 
     if let Some(cmd) = &app.config.post_command {

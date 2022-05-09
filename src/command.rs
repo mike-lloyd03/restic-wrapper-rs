@@ -171,7 +171,19 @@ pub fn mount(app: &App, repo_name: String, mount_point: String) {
 pub fn prune(app: &App, repo_name: String) {
     let repo = &app.config.repos.get(&repo_name).unwrap();
 
-    let mut restic = Restic::new("mount");
+    let mut restic = Restic::new("prune");
+    restic
+        .cmd
+        .args(["--repo", &repo.path])
+        .args(["--password-file", &repo.pw_file]);
+
+    restic.quiet(app.args.quiet).run();
+}
+
+pub fn unlock(app: &App, repo_name: String) {
+    let repo = &app.config.repos.get(&repo_name).unwrap();
+
+    let mut restic = Restic::new("unlock");
     restic
         .cmd
         .args(["--repo", &repo.path])
