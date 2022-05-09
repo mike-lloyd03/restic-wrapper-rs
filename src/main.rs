@@ -60,7 +60,7 @@ enum Command {
     /// Not implemented
     Unlock {
         /// The repository to unlock
-        repo: String,
+        repo: Option<String>,
     },
 }
 
@@ -163,7 +163,21 @@ fn main() {
             }
         }
 
-        Command::Unlock { repo } => unlock(&app, repo.to_string()),
+        Command::Unlock { repo } => {
+            let repo_name: String;
+            match repo {
+                Some(repo) => repo_name = repo.to_owned(),
+                None => {
+                    if app.config.repos.len() == 1 {
+                        repo_name = (&app.config.repos.iter().next().unwrap().0).to_string();
+                    } else {
+                        eprintln!("If more than one repo is defined, you must provide the name of the repo.");
+                        exit(1);
+                    }
+                }
+            }
+            unlock(&app, repo_name);
+        }
     };
 
     if let Some(cmd) = &app.config.post_command {

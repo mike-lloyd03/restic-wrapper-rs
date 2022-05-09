@@ -1,10 +1,10 @@
 repos:
   repo1:
-    path: /local/path/to/repo
-    pw_file: /local/path/to/password_file
+    path: /path/to/repo
+    pw_file: /path/to/password_file
   repo2:
-    path: /local/path/to/repo
-    pw_file: /local/path/to/password_file
+    path: /path/to/repo
+    pw_file: /path/to/password_file
 
 backup:
   repo_name: repo1
@@ -18,10 +18,10 @@ backup:
   post_command: "/bin/echo 'postcommand' > /home/mike/postcommand"
 
 copy:
-  pre_command: "/bin/echo 'precommand' > /home/mike/precommand"
-  post_command: "/bin/echo 'postcommand' > /home/mike/postcommand"
-  - src: repo1
-    dest: repo2
+  pre_command: insert command
+  pairs:
+    - src: repo1
+      dest: repo2
 
 forget:
   keep_daily: 7
