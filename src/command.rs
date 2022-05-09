@@ -103,7 +103,7 @@ pub fn copy(app: &App, src_repo: String, dest_repo: String) {
         .args(["--password-file2", &dest_repo.pw_file]);
 
     if let Some(copy) = &app.config.copy {
-        if let Some(cmd) = copy.pre_command {
+        if let Some(cmd) = &copy.pre_command {
             run_cmd(&cmd)
         }
     }
@@ -111,7 +111,7 @@ pub fn copy(app: &App, src_repo: String, dest_repo: String) {
     restic.quiet(app.args.quiet).run();
 
     if let Some(copy) = &app.config.copy {
-        if let Some(cmd) = copy.post_command {
+        if let Some(cmd) = &copy.post_command {
             run_cmd(&cmd)
         }
     }
