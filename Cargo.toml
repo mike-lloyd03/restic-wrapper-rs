@@ -1,6 +1,6 @@
 [package]
-name = "restic_rs"
-version = "0.1.0"
+name = "restic-rs"
+version = "0.1.1"
 edition = "2021"
 authors =  ["Mike Lloyd"]
 description = "A wrapper for restic allowing repos and backup jobs to be configured with a yaml configuration file. Written in Rust."
