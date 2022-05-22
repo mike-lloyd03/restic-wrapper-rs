@@ -6,14 +6,14 @@ struct Restic {
 }
 
 impl Restic {
-    fn new(subcommand: &str) -> Restic {
+    fn new(subcommand: &str) -> Self {
         let mut cmd = Command::new("/usr/bin/restic");
         cmd.arg(subcommand);
         Restic { cmd }
     }
 
-    /// Redirects stdout to /dev/null if `quiet = true`
-    fn quiet(mut self, quiet: bool) -> Restic {
+    // Redirects stdout to /dev/null if `quiet = true`
+    fn quiet(mut self, quiet: bool) -> Self {
         if quiet {
             self.cmd.stdout(std::process::Stdio::null());
         }
