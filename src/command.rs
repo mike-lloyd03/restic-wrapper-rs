@@ -7,7 +7,7 @@ struct Restic {
 
 impl Restic {
     fn new(subcommand: &str) -> Restic {
-        let mut cmd = Command::new("restic");
+        let mut cmd = Command::new("/usr/bin/restic");
         cmd.arg(subcommand);
         Restic { cmd }
     }
