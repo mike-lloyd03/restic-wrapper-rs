@@ -12,7 +12,7 @@ impl Restic {
         Restic { cmd }
     }
 
-    // Redirects stdout to /dev/null if `quiet = true`
+    /// Redirects stdout to /dev/null if `quiet == true`
     fn quiet(mut self, quiet: bool) -> Self {
         if quiet {
             self.cmd.stdout(std::process::Stdio::null());
@@ -23,7 +23,7 @@ impl Restic {
     fn run(mut self) {
         self.cmd
             .spawn()
-            .expect("The restic command could not be found")
+            .expect("Failed running the restic command")
             .wait()
             .unwrap();
     }
