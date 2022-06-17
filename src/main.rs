@@ -16,7 +16,12 @@ struct Args {
     args: Option<String>,
 
     /// Alternate configuration file to use
-    #[clap(short, long, value_name = "FILE", default_value = "repos.yaml")]
+    #[clap(
+        short,
+        long,
+        value_name = "FILE",
+        default_value = "/etc/restic-rs/repos.yaml"
+    )]
     config_file: String,
 
     #[clap(subcommand)]
