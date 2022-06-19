@@ -39,10 +39,6 @@ pub fn init(app: &App) {
         .args(["--repo", &repo.path])
         .args(["--password-file", &repo.pw_file]);
 
-    if app.args.dry_run {
-        restic.cmd.arg("--dry-run=true");
-    }
-
     restic.run();
 }
 
