@@ -11,10 +11,6 @@ struct Args {
     #[clap(short, long)]
     quiet: bool,
 
-    /// Arguments to pass to restic
-    #[clap(short, long)]
-    args: Option<String>,
-
     /// Alternate configuration file to use
     #[clap(
         short,
@@ -23,6 +19,10 @@ struct Args {
         default_value = "/etc/restic-rs/repos.yaml"
     )]
     config_file: String,
+
+    /// Do not upload or write any data, just show what would be done
+    #[clap(short = 'n', long)]
+    dry_run: bool,
 
     #[clap(subcommand)]
     command: Command,

@@ -39,6 +39,10 @@ pub fn init(app: &App) {
         .args(["--repo", &repo.path])
         .args(["--password-file", &repo.pw_file]);
 
+    if app.args.dry_run {
+        restic.cmd.arg("--dry-run=true");
+    }
+
     restic.run();
 }
 
@@ -56,6 +60,10 @@ pub fn backup(app: &App) {
         .args(["--repo", &repo.path])
         .args(["--password-file", &repo.pw_file])
         .arg("--exclude-caches");
+
+    if app.args.dry_run {
+        restic.cmd.arg("--dry-run=true");
+    }
 
     if let Some(excludes) = app.config.backup.exclude.as_ref() {
         for e in excludes {
@@ -102,6 +110,10 @@ pub fn copy(app: &App, src_repo: String, dest_repo: String) {
         .args(["--repo2", &dest_repo.path])
         .args(["--password-file2", &dest_repo.pw_file]);
 
+    if app.args.dry_run {
+        restic.cmd.arg("--dry-run=true");
+    }
+
     if let Some(copy) = &app.config.copy {
         if let Some(cmd) = &copy.pre_command {
             run_cmd(cmd)
@@ -126,6 +138,10 @@ pub fn forget(app: &App, repo_name: String) {
         .args(["--repo", &repo.path])
         .args(["--password-file", &repo.pw_file])
         .arg("--prune");
+
+    if app.args.dry_run {
+        restic.cmd.arg("--dry-run=true");
+    }
 
     if let Some(t) = &app.config.forget.keep_yearly {
         restic.cmd.args(["--keep-yearly", &t.to_string()]);
@@ -165,6 +181,10 @@ pub fn mount(app: &App, repo_name: String, mount_point: String) {
         .args(["--repo", &repo.path])
         .args(["--password-file", &repo.pw_file]);
 
+    if app.args.dry_run {
+        restic.cmd.arg("--dry-run=true");
+    }
+
     restic.quiet(app.args.quiet).run();
 }
 
@@ -177,6 +197,10 @@ pub fn prune(app: &App, repo_name: String) {
         .args(["--repo", &repo.path])
         .args(["--password-file", &repo.pw_file]);
 
+    if app.args.dry_run {
+        restic.cmd.arg("--dry-run=true");
+    }
+
     restic.quiet(app.args.quiet).run();
 }
 
@@ -188,6 +212,10 @@ pub fn unlock(app: &App, repo_name: String) {
         .cmd
         .args(["--repo", &repo.path])
         .args(["--password-file", &repo.pw_file]);
+
+    if app.args.dry_run {
+        restic.cmd.arg("--dry-run=true");
+    }
 
     restic.quiet(app.args.quiet).run();
 }
