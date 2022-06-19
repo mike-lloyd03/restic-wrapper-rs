@@ -6,6 +6,7 @@ struct Restic {
 }
 
 impl Restic {
+    /// Creates a new Restic command
     fn new(subcommand: &str) -> Self {
         let mut cmd = Command::new("/usr/bin/restic");
         cmd.arg(subcommand);
@@ -20,6 +21,7 @@ impl Restic {
         self
     }
 
+    /// Runs the restic command
     fn run(mut self) {
         self.cmd
             .spawn()
@@ -211,6 +213,22 @@ pub fn unlock(app: &App, repo_name: String) {
 
     if app.args.dry_run {
         restic.cmd.arg("--dry-run=true");
+    }
+
+    restic.quiet(app.args.quiet).run();
+}
+
+pub fn stats(app: &App, repo_name: Option<String>) {
+    let repo = &app.config.repos.get(&repo_name).unwrap();
+
+    let mut restic = Restic::new("stats");
+    restic
+        .cmd
+        .args(["--repo", &repo.path])
+        .args(["--password-file", &repo.pw_file]);
+
+    if let Some(repo_name) = repo {
+        restic.cmd.arg(repo_name);
     }
 
     restic.quiet(app.args.quiet).run();

@@ -67,6 +67,10 @@ enum Command {
         /// The repository to unlock
         repo: Option<String>,
     },
+    Stats {
+        /// The repository to calculate statistics for
+        repo: Option<String>,
+    },
 }
 
 fn main() {
@@ -178,6 +182,9 @@ fn main() {
                 }
             }
             unlock(&app, repo_name);
+        }
+        Command::Stats { repo } => {
+            stats(&app, repo);
         }
     };
 
