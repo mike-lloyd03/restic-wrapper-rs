@@ -225,8 +225,7 @@ pub fn stats(app: &App, repo_name: String, snapshot_id: Option<String>) {
     restic
         .cmd
         .args(["--repo", &repo.path])
-        .args(["--password-file", &repo.pw_file])
-        .arg(repo_name);
+        .args(["--password-file", &repo.pw_file]);
 
     if let Some(s) = snapshot_id {
         restic.cmd.arg(s);
