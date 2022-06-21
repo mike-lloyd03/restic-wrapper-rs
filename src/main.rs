@@ -188,7 +188,7 @@ fn main() {
     }
 }
 
-/// Checks to see if the given repo matches a repo in the configuration file
+/// Checks to see if the given repo matches
 fn match_repo_name(app: &App, repo: Option<String>) -> String {
     match repo {
         Some(repo) => repo,
@@ -197,9 +197,9 @@ fn match_repo_name(app: &App, repo: Option<String>) -> String {
                 (&app.config.repos.iter().next().unwrap().0).to_string()
             } else {
                 eprintln!(
-                    "If more than one repo is defined, you must provide the name of the repo. Repo name must be one of:"
+                    "If more than one repo is defined, you must provide the name of the repo. Repo name must be one of:\n"
                 );
-                app.config.repos.iter().for_each(|r| eprintln!("- {}", r.0));
+                app.config.repos.iter().for_each(|r| eprintln!("{}", r.0));
                 exit(1);
             }
         }
