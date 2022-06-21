@@ -68,8 +68,13 @@ enum Command {
         repo: Option<String>,
     },
     Stats {
-        /// The repository to calculate statistics for
+        /// The repository to calculate statistics for (required if more than one repo is defined
+        /// in the config file.)
         repo: Option<String>,
+
+        /// The snapshot ID to calculate statistics for. If more than one repo is configured, a
+        /// repo must be specified.
+        snapshot_id: Option<String>,
     },
 }
 
@@ -169,22 +174,12 @@ fn main() {
         }
 
         Command::Unlock { repo } => {
-            let repo_name: String;
-            match repo {
-                Some(repo) => repo_name = repo.to_owned(),
-                None => {
-                    if app.config.repos.len() == 1 {
-                        repo_name = (&app.config.repos.iter().next().unwrap().0).to_string();
-                    } else {
-                        eprintln!("If more than one repo is defined, you must provide the name of the repo.");
-                        exit(1);
-                    }
-                }
-            }
+            let repo_name = match_repo_name(&app, repo.to_owned());
             unlock(&app, repo_name);
         }
-        Command::Stats { repo } => {
-            stats(&app, repo);
+        Command::Stats { repo, snapshot_id } => {
+            let repo_name = match_repo_name(&app, repo.to_owned());
+            stats(&app, repo_name, snapshot_id.to_owned());
         }
     };
 
@@ -193,4 +188,20 @@ fn main() {
     }
 }
 
-// fn output(res: Result) {}
+/// Checks to see if the given repo matches a repo in the configuration file
+fn match_repo_name(app: &App, repo: Option<String>) -> String {
+    match repo {
+        Some(repo) => repo,
+        None => {
+            if app.config.repos.len() == 1 {
+                (&app.config.repos.iter().next().unwrap().0).to_string()
+            } else {
+                eprintln!(
+                    "If more than one repo is defined, you must provide the name of the repo. Repo name must be one of:"
+                );
+                app.config.repos.iter().for_each(|r| eprintln!("- {}", r.0));
+                exit(1);
+            }
+        }
+    }
+}

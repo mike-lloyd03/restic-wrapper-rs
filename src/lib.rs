@@ -56,7 +56,7 @@ pub struct Forget {
 /// ```
 /// use restic_rs::load_config;
 ///
-/// load_config(vec!["/etc/program/config.yaml", "~/.config/config.yaml"])
+/// load_config(vec!["/etc/program/config.yaml", "~/.config/config.yaml"]);
 /// ```
 ///
 /// # Errors

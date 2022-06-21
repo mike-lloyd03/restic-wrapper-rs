@@ -218,17 +218,18 @@ pub fn unlock(app: &App, repo_name: String) {
     restic.quiet(app.args.quiet).run();
 }
 
-pub fn stats(app: &App, repo_name: Option<String>) {
+pub fn stats(app: &App, repo_name: String, snapshot_id: Option<String>) {
     let repo = &app.config.repos.get(&repo_name).unwrap();
 
     let mut restic = Restic::new("stats");
     restic
         .cmd
         .args(["--repo", &repo.path])
-        .args(["--password-file", &repo.pw_file]);
+        .args(["--password-file", &repo.pw_file])
+        .arg(repo_name);
 
-    if let Some(repo_name) = repo {
-        restic.cmd.arg(repo_name);
+    if let Some(s) = snapshot_id {
+        restic.cmd.arg(s);
     }
 
     restic.quiet(app.args.quiet).run();
