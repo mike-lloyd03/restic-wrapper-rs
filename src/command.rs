@@ -23,11 +23,13 @@ impl Restic {
 
     /// Runs the restic command
     fn run(mut self) {
-        self.cmd
-            .spawn()
-            .expect("Failed running the restic command")
-            .wait()
-            .unwrap();
+        match self.cmd.spawn() {
+            Ok(mut c) => c.wait().unwrap(),
+            Err(e) => {
+                eprintln!("Restic command failed to run. Is restic installed?\n{}", e);
+                exit(1);
+            }
+        };
     }
 }
 
