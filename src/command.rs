@@ -155,6 +155,9 @@ pub fn forget(app: &App, repo_name: String) {
     if let Some(t) = &app.config.forget.keep_daily {
         restic.cmd.args(["--keep-daily", &t.to_string()]);
     }
+    if let Some(t) = &app.config.forget.keep_hourly {
+        restic.cmd.args(["--keep-hourly", &t.to_string()]);
+    }
 
     restic.quiet(app.args.quiet).run();
 }
