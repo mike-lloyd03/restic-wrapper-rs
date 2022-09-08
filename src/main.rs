@@ -1,8 +1,13 @@
 use clap::{Parser, Subcommand};
-pub mod command;
-use self::command::*;
-use restic_rs::{load_config, Config};
 use std::process::exit;
+
+mod command;
+mod config;
+mod snapshots;
+
+use command::*;
+use config::Config;
+use snapshots::Snapshot;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about)]
@@ -76,18 +81,19 @@ enum Command {
         /// The snapshot ID to calculate statistics for. If more than one repo is configured, a
         /// repo must be specified. (Optional)
         snapshot_id: Option<String>,
+
+        /// Calculates the statistics for each snapshot in the repo
+        #[clap(short, long)]
+        iterate_over_snapshots: bool,
     },
 }
 
 fn main() {
     let args = Args::parse();
-    let config = match load_config(vec![&args.config_file]) {
-        Ok(c) => c,
-        Err(e) => {
-            eprintln!("Unable to load the configuration file. {}", e);
-            exit(1);
-        }
-    };
+    let config = Config::load(vec![&args.config_file]).unwrap_or_else(|e| {
+        eprintln!("Unable to load the configuration file. {}", e);
+        exit(1);
+    });
     let app = App { args, config };
 
     if let Some(cmd) = &app.config.pre_command {
@@ -178,9 +184,23 @@ fn main() {
             let repo_name = match_repo_name(&app, repo.to_owned());
             unlock(&app, repo_name);
         }
-        Command::Stats { repo, snapshot_id } => {
+        Command::Stats {
+            repo,
+            snapshot_id,
+            iterate_over_snapshots,
+        } => {
             let repo_name = match_repo_name(&app, repo.to_owned());
-            stats(&app, repo_name, snapshot_id.to_owned());
+
+            if *iterate_over_snapshots {
+                let snaps_string = snapshots_json(&app, repo_name.clone());
+                let snaps = Snapshot::from_string(snaps_string);
+
+                for s in snaps {
+                    stats(&app, repo_name.clone(), Some(s.short_id));
+                }
+            } else {
+                stats(&app, repo_name, snapshot_id.to_owned());
+            }
         }
     };
 

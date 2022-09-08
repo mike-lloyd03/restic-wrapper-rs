@@ -21,6 +21,11 @@ impl Restic {
         self
     }
 
+    fn output(&mut self) -> String {
+        let out = self.cmd.output().unwrap();
+        String::from_utf8(out.stdout).unwrap()
+    }
+
     /// Runs the restic command
     fn run(mut self) {
         match self.cmd.spawn() {
@@ -172,6 +177,19 @@ pub fn snapshots(app: &App, repo_name: String) {
         .args(["--password-file", &repo.pw_file]);
 
     restic.quiet(app.args.quiet).run();
+}
+
+pub fn snapshots_json(app: &App, repo_name: String) -> String {
+    let repo = &app.config.repos.get(&repo_name).unwrap();
+
+    let mut restic = Restic::new("snapshots");
+    restic
+        .cmd
+        .args(["--repo", &repo.path])
+        .args(["--password-file", &repo.pw_file])
+        .arg("--json");
+
+    restic.output()
 }
 
 pub fn mount(app: &App, repo_name: String, mount_point: String) {
