@@ -62,18 +62,19 @@ enum Command {
         /// The repository to get snapshots from (default=all)
         repo: Option<String>,
     },
-    /// Not implemented
+    /// Unlocks the specified repo
     Unlock {
         /// The repository to unlock
         repo: Option<String>,
     },
+    /// Displays statistics about the configured repos
     Stats {
         /// The repository to calculate statistics for (required if more than one repo is defined
-        /// in the config file.)
+        /// in the config file.) (Optional)
         repo: Option<String>,
 
         /// The snapshot ID to calculate statistics for. If more than one repo is configured, a
-        /// repo must be specified.
+        /// repo must be specified. (Optional)
         snapshot_id: Option<String>,
     },
 }
