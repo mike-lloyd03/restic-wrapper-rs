@@ -205,6 +205,7 @@ fn main() {
                 let snaps = Snapshot::from_string(snaps_string);
 
                 for s in snaps {
+                    println!("Snapshot id {}", s.short_id);
                     stats(&app, repo_name.clone(), Some(s.short_id));
                 }
             } else {
