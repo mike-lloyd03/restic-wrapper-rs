@@ -105,10 +105,10 @@ pub fn copy(app: &App, src_repo: String, dest_repo: String) {
     let mut restic = Restic::new("copy");
     restic
         .cmd
-        .args(["--repo", &src_repo.path])
-        .args(["--password-file", &src_repo.pw_file])
-        .args(["--repo2", &dest_repo.path])
-        .args(["--password-file2", &dest_repo.pw_file]);
+        .args(["--from-repo", &src_repo.path])
+        .args(["--from-password-file", &src_repo.pw_file])
+        .args(["--repo", &dest_repo.path])
+        .args(["--password-file", &dest_repo.pw_file]);
 
     if app.args.dry_run {
         restic.cmd.arg("--dry-run=true");
