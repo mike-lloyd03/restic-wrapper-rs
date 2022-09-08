@@ -86,6 +86,14 @@ enum Command {
         #[clap(short, long)]
         iterate_over_snapshots: bool,
     },
+    /// Forgets either a specified snapshot or forgets snapshots according to the configuration
+    Forget {
+        /// The repository from which snapshots will be deleted
+        repo: Option<String>,
+
+        /// The snapshot ID to forget
+        snapshot_id: Option<String>,
+    },
 }
 
 fn main() {
@@ -106,7 +114,7 @@ fn main() {
         Command::Backup => {
             let repo_name = &app.config.backup.repo_name;
             backup(&app);
-            forget(&app, repo_name.to_string());
+            forget(&app, repo_name.to_string(), None);
         }
 
         Command::Check { repo } => {
@@ -141,7 +149,7 @@ fn main() {
                 }
 
                 copy(&app, c.src.to_string(), c.dest.to_string());
-                forget(&app, c.dest.to_string());
+                forget(&app, c.dest.to_string(), None);
             }
         }
 
@@ -184,6 +192,7 @@ fn main() {
             let repo_name = match_repo_name(&app, repo.to_owned());
             unlock(&app, repo_name);
         }
+
         Command::Stats {
             repo,
             snapshot_id,
@@ -201,6 +210,10 @@ fn main() {
             } else {
                 stats(&app, repo_name, snapshot_id.to_owned());
             }
+        }
+        Command::Forget { repo, snapshot_id } => {
+            let repo_name = match_repo_name(&app, repo.to_owned());
+            forget(&app, repo_name, snapshot_id.to_owned());
         }
     };
 

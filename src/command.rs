@@ -134,7 +134,7 @@ pub fn copy(app: &App, src_repo: String, dest_repo: String) {
     }
 }
 
-pub fn forget(app: &App, repo_name: String) {
+pub fn forget(app: &App, repo_name: String, snapshot_id: Option<String>) {
     let repo = &app.config.repos.get(&repo_name).unwrap();
 
     let mut restic = Restic::new("forget");
@@ -148,20 +148,24 @@ pub fn forget(app: &App, repo_name: String) {
         restic.cmd.arg("--dry-run=true");
     }
 
-    if let Some(t) = &app.config.forget.keep_yearly {
-        restic.cmd.args(["--keep-yearly", &t.to_string()]);
-    }
-    if let Some(t) = &app.config.forget.keep_monthly {
-        restic.cmd.args(["--keep-monthly", &t.to_string()]);
-    }
-    if let Some(t) = &app.config.forget.keep_weekly {
-        restic.cmd.args(["--keep-weekly", &t.to_string()]);
-    }
-    if let Some(t) = &app.config.forget.keep_daily {
-        restic.cmd.args(["--keep-daily", &t.to_string()]);
-    }
-    if let Some(t) = &app.config.forget.keep_hourly {
-        restic.cmd.args(["--keep-hourly", &t.to_string()]);
+    if let Some(id) = snapshot_id {
+        restic.cmd.arg(id);
+    } else {
+        if let Some(t) = &app.config.forget.keep_yearly {
+            restic.cmd.args(["--keep-yearly", &t.to_string()]);
+        }
+        if let Some(t) = &app.config.forget.keep_monthly {
+            restic.cmd.args(["--keep-monthly", &t.to_string()]);
+        }
+        if let Some(t) = &app.config.forget.keep_weekly {
+            restic.cmd.args(["--keep-weekly", &t.to_string()]);
+        }
+        if let Some(t) = &app.config.forget.keep_daily {
+            restic.cmd.args(["--keep-daily", &t.to_string()]);
+        }
+        if let Some(t) = &app.config.forget.keep_hourly {
+            restic.cmd.args(["--keep-hourly", &t.to_string()]);
+        }
     }
 
     restic.quiet(app.args.quiet).run();
