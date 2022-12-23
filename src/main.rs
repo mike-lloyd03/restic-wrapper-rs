@@ -51,6 +51,8 @@ enum Command {
     },
     /// Copy all configured repo pairs
     CopyAll,
+    /// List all configured repos
+    List,
     /// Mount the repository at the specified location
     Mount {
         repo: String,
@@ -152,6 +154,8 @@ fn main() {
                 forget(&app, c.dest.to_string(), None);
             }
         }
+
+        Command::List => list(&app),
 
         Command::Mount { repo, mount_point } => {
             mount(&app, repo.to_string(), mount_point.to_string())

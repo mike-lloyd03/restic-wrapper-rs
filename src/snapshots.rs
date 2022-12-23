@@ -1,5 +1,4 @@
 use serde::Deserialize;
-use serde_json;
 
 #[derive(Debug, Deserialize)]
 pub struct Snapshot {

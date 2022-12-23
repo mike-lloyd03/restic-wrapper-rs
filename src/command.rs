@@ -263,7 +263,7 @@ pub fn stats(app: &App, repo_name: String, snapshot_id: Option<String>) {
 
 pub fn run_cmd(cmd_str: &str) {
     let mut cmd = Command::new("/bin/bash");
-    cmd.arg("-c").arg(&cmd_str);
+    cmd.arg("-c").arg(cmd_str);
 
     match cmd.spawn() {
         Ok(mut cmd) => {
@@ -273,5 +273,11 @@ pub fn run_cmd(cmd_str: &str) {
             eprintln!("Failed to run command '{}'. {}", cmd_str, e);
             exit(1);
         }
+    }
+}
+
+pub fn list(app: &App) {
+    for repo in &app.config.repos {
+        println!("{}", repo.0)
     }
 }
