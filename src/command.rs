@@ -283,7 +283,7 @@ fn get_repo<'a>(app: &'a App, repo_name: &str) -> &'a Repo {
     match app.config.repos.get(repo_name) {
         Some(r) => r,
         None => {
-            eprintln!("Failed to get repo '{}", repo_name);
+            eprintln!("Failed to get repo '{}'", repo_name);
             exit(1)
         }
     }
