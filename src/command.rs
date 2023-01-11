@@ -1,4 +1,4 @@
-use crate::App;
+use crate::{config::Repo, App};
 use std::process::{exit, Command};
 
 struct Restic {
@@ -23,7 +23,7 @@ impl Restic {
 
     fn output(&mut self) -> String {
         let out = self.cmd.output().unwrap();
-        String::from_utf8(out.stdout).unwrap()
+        String::from_utf8_lossy(&out.stdout).to_string()
     }
 
     /// Runs the restic command
@@ -40,7 +40,7 @@ impl Restic {
 
 pub fn init(app: &App) {
     let repo_name = &app.config.backup.repo_name;
-    let repo = app.config.repos.get(repo_name).unwrap();
+    let repo = get_repo(app, repo_name);
 
     let mut restic = Restic::new("init");
     restic
@@ -53,11 +53,7 @@ pub fn init(app: &App) {
 
 pub fn backup(app: &App) {
     let repo_name = &app.config.backup.repo_name;
-    let repo = app
-        .config
-        .repos
-        .get(repo_name)
-        .unwrap_or_else(|| panic!("Failed to find {} in repo map", repo_name));
+    let repo = get_repo(app, repo_name);
 
     let mut restic = Restic::new("backup");
     restic
@@ -92,7 +88,7 @@ pub fn backup(app: &App) {
 }
 
 pub fn check(app: &App, repo_name: String) {
-    let repo = &app.config.repos.get(&repo_name).unwrap();
+    let repo = get_repo(app, &repo_name);
 
     let mut restic = Restic::new("check");
     restic
@@ -104,8 +100,8 @@ pub fn check(app: &App, repo_name: String) {
 }
 
 pub fn copy(app: &App, src_repo: String, dest_repo: String) {
-    let src_repo = &app.config.repos.get(&src_repo).unwrap();
-    let dest_repo = &app.config.repos.get(&dest_repo).unwrap();
+    let src_repo = get_repo(app, &src_repo);
+    let dest_repo = get_repo(app, &dest_repo);
 
     let mut restic = Restic::new("copy");
     restic
@@ -135,7 +131,7 @@ pub fn copy(app: &App, src_repo: String, dest_repo: String) {
 }
 
 pub fn forget(app: &App, repo_name: String, snapshot_id: Option<String>) {
-    let repo = &app.config.repos.get(&repo_name).unwrap();
+    let repo = get_repo(app, &repo_name);
 
     let mut restic = Restic::new("forget");
     restic
@@ -172,7 +168,7 @@ pub fn forget(app: &App, repo_name: String, snapshot_id: Option<String>) {
 }
 
 pub fn snapshots(app: &App, repo_name: String) {
-    let repo = &app.config.repos.get(&repo_name).unwrap();
+    let repo = get_repo(app, &repo_name);
 
     let mut restic = Restic::new("snapshots");
     restic
@@ -184,7 +180,7 @@ pub fn snapshots(app: &App, repo_name: String) {
 }
 
 pub fn snapshots_json(app: &App, repo_name: String) -> String {
-    let repo = &app.config.repos.get(&repo_name).unwrap();
+    let repo = get_repo(app, &repo_name);
 
     let mut restic = Restic::new("snapshots");
     restic
@@ -197,7 +193,7 @@ pub fn snapshots_json(app: &App, repo_name: String) -> String {
 }
 
 pub fn mount(app: &App, repo_name: String, mount_point: String) {
-    let repo = &app.config.repos.get(&repo_name).unwrap();
+    let repo = get_repo(app, &repo_name);
 
     let mut restic = Restic::new("mount");
     restic
@@ -214,7 +210,7 @@ pub fn mount(app: &App, repo_name: String, mount_point: String) {
 }
 
 pub fn prune(app: &App, repo_name: String) {
-    let repo = &app.config.repos.get(&repo_name).unwrap();
+    let repo = get_repo(app, &repo_name);
 
     let mut restic = Restic::new("prune");
     restic
@@ -230,7 +226,7 @@ pub fn prune(app: &App, repo_name: String) {
 }
 
 pub fn unlock(app: &App, repo_name: String) {
-    let repo = &app.config.repos.get(&repo_name).unwrap();
+    let repo = get_repo(app, &repo_name);
 
     let mut restic = Restic::new("unlock");
     restic
@@ -246,7 +242,7 @@ pub fn unlock(app: &App, repo_name: String) {
 }
 
 pub fn stats(app: &App, repo_name: String, snapshot_id: Option<String>) {
-    let repo = &app.config.repos.get(&repo_name).unwrap();
+    let repo = get_repo(app, &repo_name);
 
     let mut restic = Restic::new("stats");
     restic
@@ -279,5 +275,16 @@ pub fn run_cmd(cmd_str: &str) {
 pub fn list(app: &App) {
     for repo in &app.config.repos {
         println!("{}", repo.0)
+    }
+}
+
+/// Gets the repo name from the config file. Exits the program if it isn't found.
+fn get_repo<'a>(app: &'a App, repo_name: &str) -> &'a Repo {
+    match app.config.repos.get(repo_name) {
+        Some(r) => r,
+        None => {
+            eprintln!("Failed to get repo '{}", repo_name);
+            exit(1)
+        }
     }
 }

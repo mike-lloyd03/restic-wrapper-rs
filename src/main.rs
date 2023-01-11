@@ -211,6 +211,7 @@ fn main() {
                 for s in snaps {
                     println!("Snapshot id {}", s.short_id);
                     stats(&app, repo_name.clone(), Some(s.short_id));
+                    println!();
                 }
             } else {
                 stats(&app, repo_name, snapshot_id.to_owned());
