@@ -47,6 +47,7 @@ pub struct Forget {
     pub keep_weekly: Option<u32>,
     pub keep_monthly: Option<u32>,
     pub keep_yearly: Option<u32>,
+    pub keep_tags: Option<Vec<String>>,
 }
 
 impl Config {

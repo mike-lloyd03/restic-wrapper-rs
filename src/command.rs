@@ -162,6 +162,11 @@ pub fn forget(app: &App, repo_name: String, snapshot_id: Option<String>) {
         if let Some(t) = &app.config.forget.keep_hourly {
             restic.cmd.args(["--keep-hourly", &t.to_string()]);
         }
+        if let Some(t) = &app.config.forget.keep_tags {
+            t.iter().for_each(|tag| {
+                restic.cmd.args(["--keep-tag", tag]);
+            });
+        }
     }
 
     restic.quiet(app.args.quiet).run();
